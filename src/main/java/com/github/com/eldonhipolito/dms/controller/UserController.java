@@ -22,7 +22,7 @@ public class UserController {
 
 	private final UserService userService;
 
-	@PostMapping
+	@PostMapping("/register")
 	public ResponseEntity<GenericResponse> register(@RequestBody CreateUserRequest createUserRequest) {
 		log.debug("[USER] - register({})", createUserRequest.getUsername());
 
