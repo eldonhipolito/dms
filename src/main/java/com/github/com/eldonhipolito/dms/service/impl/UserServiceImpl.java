@@ -33,11 +33,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void createUser(CreateUserRequest createUserRequest) {
+	public int createUser(CreateUserRequest createUserRequest) {
 		log.info("[USER] - Creating user with username : {}", createUserRequest.getUsername());
 		User user = new User(0L, createUserRequest.getUsername(),
 				this.hashingStrategy.hash(createUserRequest.getPassword()), createUserRequest.getEmail());
 		user = this.userRepository.save(user);
+
+		return user.getId().intValue();
 	}
 
 }

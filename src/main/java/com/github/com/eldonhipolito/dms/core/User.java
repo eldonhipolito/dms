@@ -10,12 +10,14 @@ import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @Table(name = "tbl_user")
+@ToString
 public class User {
 
 	@Id

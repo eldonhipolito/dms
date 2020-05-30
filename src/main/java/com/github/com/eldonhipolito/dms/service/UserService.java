@@ -7,6 +7,6 @@ public interface UserService {
 
 	public AuthenticationResponse authenticate(String username, String password);
 
-	public void createUser(CreateUserRequest createUserRequest);
+	public int createUser(CreateUserRequest createUserRequest);
 
 }

@@ -11,6 +11,8 @@ import lombok.ToString;
 @ToString
 public class GenericResponse {
 
+	public boolean success;
+
 	private String result;
 
 }
