@@ -11,32 +11,33 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.github.com.eldonhipolito.dms.exception.UncheckedException;
 import com.github.com.eldonhipolito.dms.repository.DocumentRepository;
 import com.github.com.eldonhipolito.dms.repository.UserRepository;
 import com.github.com.eldonhipolito.dms.request.CreateDocumentRequest;
 import com.github.com.eldonhipolito.dms.service.DocumentService;
-import com.github.com.eldonhipolito.dms.service.HashingStrategy;
+import com.github.com.eldonhipolito.dms.service.FileHashingStrategy;
 
 class DocumentServiceImplTest {
 
 	private DocumentRepository documentRepository;
 
-	private HashingStrategy hashingStrategy;
+	private FileHashingStrategy hashingStrategy;
 
 	private DocumentService documentService;
-	
+
 	private UserRepository userRepository;
 
 	@BeforeEach
 	void setUp() throws Exception {
 		documentRepository = Mockito.mock(DocumentRepository.class);
 		userRepository = Mockito.mock(UserRepository.class);
-		hashingStrategy = Mockito.mock(HashingStrategy.class);
+		hashingStrategy = Mockito.mock(FileHashingStrategy.class);
 		documentService = new DocumentServiceImpl(documentRepository, hashingStrategy, userRepository);
 	}
 
 	@Test
-	void testSuccess() {
+	void testSuccess() throws UncheckedException, IOException {
 
 		CreateDocumentRequest req = new CreateDocumentRequest("Doc1", "First document", 3, new MultipartFile() {
 

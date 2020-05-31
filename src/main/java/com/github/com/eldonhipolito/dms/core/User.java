@@ -1,10 +1,13 @@
 package com.github.com.eldonhipolito.dms.core;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -30,5 +33,19 @@ public class User {
 	private String passwordHash;
 
 	private String email;
+
+	@OneToMany(mappedBy = "user")
+	private List<Document> ownedDocuments;
+
+	@OneToMany(mappedBy = "user")
+	private List<DocumentSignature> documentSignatures;
+
+	public User(Long id, String username, String passwordHash, String email) {
+		super();
+		this.id = id;
+		this.username = username;
+		this.passwordHash = passwordHash;
+		this.email = email;
+	}
 
 }
