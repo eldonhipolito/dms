@@ -4,14 +4,17 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.Optional;
 
+import org.bouncycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.github.com.eldonhipolito.dms.config.ApplicationConfig;
 import com.github.com.eldonhipolito.dms.core.Document;
+import com.github.com.eldonhipolito.dms.core.DocumentAccess;
 import com.github.com.eldonhipolito.dms.core.User;
 import com.github.com.eldonhipolito.dms.exception.UncheckedException;
+import com.github.com.eldonhipolito.dms.repository.DocumentAccessRepository;
 import com.github.com.eldonhipolito.dms.repository.DocumentRepository;
 import com.github.com.eldonhipolito.dms.repository.UserRepository;
 import com.github.com.eldonhipolito.dms.request.CreateDocumentRequest;
@@ -34,6 +37,8 @@ public class DocumentServiceImpl implements DocumentService {
 
 	private final FileEncryptionService fileEncryptionService;
 
+	private final DocumentAccessRepository documentAccessRepository;
+
 	private final ApplicationConfig applicationConfig;
 
 	@Autowired
@@ -41,12 +46,13 @@ public class DocumentServiceImpl implements DocumentService {
 			@Qualifier("SHA256HashingStrategy") FileHashingStrategy sha256HashingStrategy,
 			UserRepository userRepository,
 			@Qualifier("FileEncryptionService") FileEncryptionService fileEncryptionService,
-			ApplicationConfig applicationConfig) {
+			DocumentAccessRepository documentAccessRepository, ApplicationConfig applicationConfig) {
 		super();
 		this.documentRepository = documentRepository;
 		this.sha256HashingStrategy = sha256HashingStrategy;
 		this.userRepository = userRepository;
 		this.fileEncryptionService = fileEncryptionService;
+		this.documentAccessRepository = documentAccessRepository;
 		this.applicationConfig = applicationConfig;
 	}
 
@@ -72,12 +78,19 @@ public class DocumentServiceImpl implements DocumentService {
 			throw new UncheckedException("Unable to save document");
 		}
 
-		// TODO Encrypt and store file....
 		String encodedKey;
 		try {
 			encodedKey = fileEncryptionService.generateRandomKey();
-			fileEncryptionService.encryptAndStore(fileName, createDocumentRequest.getFile().getBytes(),
-					Base64.getDecoder().decode(encodedKey.getBytes()));
+			byte[] decodedKey = Base64.getDecoder().decode(encodedKey.getBytes());
+			fileEncryptionService.encryptAndStore(fileName, createDocumentRequest.getFile().getBytes(), decodedKey);
+
+			byte[] encryptedKey = fileEncryptionService.encrypt(decodedKey,
+					Hex.decode(this.sha256HashingStrategy.hash(createDocumentRequest.getPassword().getBytes())));
+
+			DocumentAccess docAccess = new DocumentAccess(0L, doc.getDocumentOwner(), doc,
+					Base64.getEncoder().encodeToString(encryptedKey), 1, "");
+
+			docAccess = documentAccessRepository.save(docAccess);
 
 		} catch (Exception e) {
 			throw new UncheckedException(e);

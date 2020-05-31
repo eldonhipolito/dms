@@ -11,29 +11,42 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.github.com.eldonhipolito.dms.config.ApplicationConfig;
 import com.github.com.eldonhipolito.dms.exception.UncheckedException;
+import com.github.com.eldonhipolito.dms.repository.DocumentAccessRepository;
 import com.github.com.eldonhipolito.dms.repository.DocumentRepository;
 import com.github.com.eldonhipolito.dms.repository.UserRepository;
 import com.github.com.eldonhipolito.dms.request.CreateDocumentRequest;
 import com.github.com.eldonhipolito.dms.service.DocumentService;
+import com.github.com.eldonhipolito.dms.service.FileEncryptionService;
 import com.github.com.eldonhipolito.dms.service.FileHashingStrategy;
 
 class DocumentServiceImplTest {
 
 	private DocumentRepository documentRepository;
 
-	private FileHashingStrategy hashingStrategy;
-
 	private DocumentService documentService;
 
 	private UserRepository userRepository;
+
+	private FileHashingStrategy hashingStrategy;
+
+	private FileEncryptionService fileEncryptionService;
+
+	private DocumentAccessRepository documentAccessRepository;
+
+	private ApplicationConfig applicationConfig;
 
 	@BeforeEach
 	void setUp() throws Exception {
 		documentRepository = Mockito.mock(DocumentRepository.class);
 		userRepository = Mockito.mock(UserRepository.class);
 		hashingStrategy = Mockito.mock(FileHashingStrategy.class);
-		documentService = new DocumentServiceImpl(documentRepository, hashingStrategy, userRepository);
+		fileEncryptionService = Mockito.mock(FileEncryptionService.class);
+		documentAccessRepository = Mockito.mock(DocumentAccessRepository.class);
+		applicationConfig = Mockito.mock(ApplicationConfig.class);
+		documentService = new DocumentServiceImpl(documentRepository, hashingStrategy, userRepository,
+				fileEncryptionService, documentAccessRepository, applicationConfig);
 	}
 
 	@Test
@@ -88,7 +101,7 @@ class DocumentServiceImplTest {
 				// TODO Auto-generated method stub
 				return new byte[] { 1, 2, 3, 4 };
 			}
-		}, "eldon");
+		}, "eldon", "password");
 		String result = documentService.createDocument(req);
 		assertThat(result).isNotBlank();
 	}
