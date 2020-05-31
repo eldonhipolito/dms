@@ -20,5 +20,9 @@ public class CreateDocumentRequest {
 	private int numberSignatoriesRequired;
 	private MultipartFile file;
 	private String creator;
+	
+	
+	// for milestone 1 password will be used as the key
+	private String password;
 
 }

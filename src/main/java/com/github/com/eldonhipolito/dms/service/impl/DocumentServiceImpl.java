@@ -1,18 +1,21 @@
 package com.github.com.eldonhipolito.dms.service.impl;
 
 import java.io.IOException;
+import java.util.Base64;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
+import com.github.com.eldonhipolito.dms.config.ApplicationConfig;
 import com.github.com.eldonhipolito.dms.core.Document;
 import com.github.com.eldonhipolito.dms.core.User;
 import com.github.com.eldonhipolito.dms.exception.UncheckedException;
 import com.github.com.eldonhipolito.dms.repository.DocumentRepository;
 import com.github.com.eldonhipolito.dms.repository.UserRepository;
 import com.github.com.eldonhipolito.dms.request.CreateDocumentRequest;
+import com.github.com.eldonhipolito.dms.request.DocumentValidationRequest;
 import com.github.com.eldonhipolito.dms.service.DocumentService;
 import com.github.com.eldonhipolito.dms.service.FileEncryptionService;
 import com.github.com.eldonhipolito.dms.service.FileHashingStrategy;
@@ -31,16 +34,20 @@ public class DocumentServiceImpl implements DocumentService {
 
 	private final FileEncryptionService fileEncryptionService;
 
+	private final ApplicationConfig applicationConfig;
+
 	@Autowired
 	public DocumentServiceImpl(DocumentRepository documentRepository,
 			@Qualifier("SHA256HashingStrategy") FileHashingStrategy sha256HashingStrategy,
 			UserRepository userRepository,
-			@Qualifier("FileEncryptionService") FileEncryptionService fileEncryptionService) {
+			@Qualifier("FileEncryptionService") FileEncryptionService fileEncryptionService,
+			ApplicationConfig applicationConfig) {
 		super();
 		this.documentRepository = documentRepository;
 		this.sha256HashingStrategy = sha256HashingStrategy;
 		this.userRepository = userRepository;
 		this.fileEncryptionService = fileEncryptionService;
+		this.applicationConfig = applicationConfig;
 	}
 
 	@Override
@@ -55,8 +62,9 @@ public class DocumentServiceImpl implements DocumentService {
 
 		String hash = this.sha256HashingStrategy.hash(createDocumentRequest.getFile().getBytes());
 
+		String fileName = applicationConfig.getFileStoreLocation() + hash;
 		Document doc = new Document(0L, hash, createDocumentRequest.getTitle(), createDocumentRequest.getDescription(),
-				"/" + hash, user, createDocumentRequest.getNumberSignatoriesRequired());
+				fileName, user, createDocumentRequest.getNumberSignatoriesRequired());
 
 		doc = documentRepository.save(doc);
 
@@ -65,14 +73,35 @@ public class DocumentServiceImpl implements DocumentService {
 		}
 
 		// TODO Encrypt and store file....
+		String encodedKey;
+		try {
+			encodedKey = fileEncryptionService.generateRandomKey();
+			fileEncryptionService.encryptAndStore(fileName, createDocumentRequest.getFile().getBytes(),
+					Base64.getDecoder().decode(encodedKey.getBytes()));
+
+		} catch (Exception e) {
+			throw new UncheckedException(e);
+		}
 
 		return hash;
 	}
 
 	@Override
-	public boolean isDocumentValid(MultipartFile file) throws UncheckedException {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean isDocumentValid(DocumentValidationRequest request) throws UncheckedException {
+		log.info("[DOCUMENT] isDocumentValid({})", request.getDocumentId());
+
+		Optional<Document> doc = this.documentRepository.findById((long) request.getDocumentId());
+
+		if (doc.isEmpty()) {
+			throw new UncheckedException("Document not found");
+		}
+
+		try {
+			return sha256HashingStrategy.isEqualToRawFile(request.getFile().getBytes(), doc.get().getDocumentHash());
+		} catch (IOException e) {
+			throw new UncheckedException(e);
+		}
+
 	}
 
 }

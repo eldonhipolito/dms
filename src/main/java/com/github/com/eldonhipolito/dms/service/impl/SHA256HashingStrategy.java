@@ -53,4 +53,10 @@ public class SHA256HashingStrategy implements FileHashingStrategy {
 
 	}
 
+	@Override
+	public boolean isEqualToRawFile(byte[] raw, String hashed) {
+		return this.hash(raw).equalsIgnoreCase(hashed);
+
+	}
+
 }

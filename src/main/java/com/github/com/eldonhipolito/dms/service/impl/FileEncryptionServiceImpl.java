@@ -76,7 +76,6 @@ public class FileEncryptionServiceImpl implements FileEncryptionService {
 
 			try (CipherInputStream cipherIn = new CipherInputStream(fs, cipher)) {
 
-				// cipherIn.skipNBytes(16);
 				return cipherIn.readAllBytes();
 
 			}
@@ -96,11 +95,6 @@ public class FileEncryptionServiceImpl implements FileEncryptionService {
 		random.nextBytes(nonce);
 		GCMParameterSpec spec = new GCMParameterSpec(TAG_SIZE, nonce);
 		cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), spec);
-
-		// try (FileOutputStream nonceFile = new FileOutputStream(fileName)) {
-		System.out.println("putangina Nonce for encryption : " + new String(nonce));
-		// nonceFile.write(Hex.encode(nonce));
-		// }
 
 		try (FileOutputStream fileOut = new FileOutputStream(new File(fileName));
 				CipherOutputStream cipherOut = new CipherOutputStream(fileOut, cipher)) {
