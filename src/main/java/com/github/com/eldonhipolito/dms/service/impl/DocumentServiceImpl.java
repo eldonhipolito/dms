@@ -14,6 +14,7 @@ import com.github.com.eldonhipolito.dms.repository.DocumentRepository;
 import com.github.com.eldonhipolito.dms.repository.UserRepository;
 import com.github.com.eldonhipolito.dms.request.CreateDocumentRequest;
 import com.github.com.eldonhipolito.dms.service.DocumentService;
+import com.github.com.eldonhipolito.dms.service.FileEncryptionService;
 import com.github.com.eldonhipolito.dms.service.FileHashingStrategy;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,14 +29,18 @@ public class DocumentServiceImpl implements DocumentService {
 
 	private final UserRepository userRepository;
 
+	private final FileEncryptionService fileEncryptionService;
+
 	@Autowired
 	public DocumentServiceImpl(DocumentRepository documentRepository,
 			@Qualifier("SHA256HashingStrategy") FileHashingStrategy sha256HashingStrategy,
-			UserRepository userRepository) {
+			UserRepository userRepository,
+			@Qualifier("FileEncryptionService") FileEncryptionService fileEncryptionService) {
 		super();
 		this.documentRepository = documentRepository;
 		this.sha256HashingStrategy = sha256HashingStrategy;
 		this.userRepository = userRepository;
+		this.fileEncryptionService = fileEncryptionService;
 	}
 
 	@Override

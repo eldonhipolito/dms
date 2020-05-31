@@ -1,11 +1,8 @@
 package com.github.com.eldonhipolito.dms.service.impl;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.springframework.stereotype.Service;
 

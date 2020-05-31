@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.github.com.eldonhipolito.dms.service.HashingStrategy;
 
-@Service
+@Service(value = "BCryptHashingStrategy")
 public class BCryptHashingStrategy implements HashingStrategy {
 
 	private final PasswordEncoder bcryptPasswordEncoder;
