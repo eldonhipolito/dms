@@ -1,6 +1,7 @@
 package com.github.com.eldonhipolito.dms.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.github.com.eldonhipolito.dms.core.User;
@@ -21,7 +22,8 @@ public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
 
 	@Autowired
-	public UserServiceImpl(HashingStrategy hashingStrategy, UserRepository userRepository) {
+	public UserServiceImpl(@Qualifier("BCryptHashingStrategy") HashingStrategy hashingStrategy,
+			UserRepository userRepository) {
 		this.hashingStrategy = hashingStrategy;
 		this.userRepository = userRepository;
 	}

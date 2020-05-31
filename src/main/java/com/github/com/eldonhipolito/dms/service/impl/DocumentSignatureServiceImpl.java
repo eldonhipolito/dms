@@ -53,7 +53,10 @@ public class DocumentSignatureServiceImpl implements DocumentSignatureService {
 		DocumentSignature dc = new DocumentSignature(0L, doc.get(), user, doc.get().getDocumentHash(), "");
 
 		dc = documentSignatureRepository.save(dc);
-		
+
+		if (dc.getId().intValue() < 1) {
+			throw new UncheckedException("Unable to save document signature");
+		}
 
 		return dc.getId().intValue();
 	}
