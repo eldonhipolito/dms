@@ -10,12 +10,14 @@ import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "tbl_documentaccess")
 public class DocumentAccess {
 
@@ -24,11 +26,11 @@ public class DocumentAccess {
 	private Long id;
 
 	@ManyToOne
-	@JoinColumn(name = "user_id", nullable = false)
-	private User viewer;
+	@JoinColumn(name = "userId", nullable = false)
+	private User user;
 
 	@ManyToOne
-	@JoinColumn(name = "document_id", nullable = false)
+	@JoinColumn(name = "documentId", nullable = false)
 	private Document document;
 	private String encryptedKey;
 	private int version;

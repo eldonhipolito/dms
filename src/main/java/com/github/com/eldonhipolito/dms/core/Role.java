@@ -12,6 +12,7 @@ import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -19,6 +20,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "tbl_role")
 @ToString
 public class Role {
@@ -28,8 +30,6 @@ public class Role {
     private Long id;
  
     private String name;
-    @ManyToMany(mappedBy = "roles")
-    private Collection<User> users;
     
 //    @ManyToMany
 //    @JoinTable(

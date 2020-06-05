@@ -2,9 +2,11 @@ package com.github.com.eldonhipolito.dms.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.com.eldonhipolito.dms.request.CreateUserRequest;
@@ -20,22 +22,23 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("users")
 public class UserController {
 
-	private final UserService userService;
+  private final UserService userService;
 
-	@PostMapping("/register")
-	public ResponseEntity<GenericResponse> register(@RequestBody CreateUserRequest createUserRequest) {
-		log.debug("[USER] - register({})", createUserRequest.getUsername());
+  @PostMapping("/register")
+  public ResponseEntity<GenericResponse> register(
+      @RequestBody CreateUserRequest createUserRequest) {
+    log.debug("[USER] - register({})", createUserRequest.getUsername());
 
-		GenericResponse response;
-		try {
-			userService.createUser(createUserRequest);
-			response = new GenericResponse(true, "Successfully created user.");
-		} catch (Exception e) {
-			log.error("Error while creating user : {}", e);
-			response = new GenericResponse(false, "Error creating user. Please try again");
-		}
+    GenericResponse response;
+    try {
+      userService.createUser(createUserRequest);
+      response = new GenericResponse(true, "Successfully created user.");
+    } catch (Exception e) {
+      log.error("Error while creating user : {}", e);
+      response = new GenericResponse(false, "Error creating user. Please try again");
+      return new ResponseEntity<GenericResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-		return new ResponseEntity<GenericResponse>(response, HttpStatus.OK);
-
-	}
+    return new ResponseEntity<GenericResponse>(response, HttpStatus.OK);
+  }
 }

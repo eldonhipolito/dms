@@ -31,7 +31,7 @@ public class RoleAssignmentServiceImplTest {
 	public void addRoleAssignmentSuccess() {
 		
 		User testUser = new User(1L, "test", "secret", "test@mail.com");
-		Role testRole = new Role(1L, "test role", new ArrayList<User>());
+		Role testRole = new Role(1L, "test role");
 		RoleAssignment roleAssignment = new RoleAssignment(testUser.getId(), testRole.getId());
 		
 		Mockito.when(roleAssignmentRepository.save(Mockito.any(RoleAssignment.class)))

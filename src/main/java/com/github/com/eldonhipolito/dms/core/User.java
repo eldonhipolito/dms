@@ -12,6 +12,7 @@ import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -19,6 +20,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "tbl_user")
 @ToString
 public class User {
@@ -34,7 +36,7 @@ public class User {
 
 	private String email;
 
-	@OneToMany(mappedBy = "user")
+	@OneToMany(mappedBy = "documentOwner")
 	private List<Document> ownedDocuments;
 
 	@OneToMany(mappedBy = "user")

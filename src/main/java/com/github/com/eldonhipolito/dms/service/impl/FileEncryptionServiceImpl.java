@@ -30,79 +30,79 @@ import com.github.com.eldonhipolito.dms.service.FileEncryptionService;
 @Service(value = "FileEncryptionService")
 public class FileEncryptionServiceImpl implements FileEncryptionService {
 
-	private final EncryptionService aesEncryptionService;
+  private final EncryptionService aesEncryptionService;
 
-	private final SecureRandom random;
+  private final SecureRandom random;
 
-	private static final int TAG_SIZE = 128;
+  private static final int TAG_SIZE = 128;
 
-	@Autowired
-	public FileEncryptionServiceImpl(@Qualifier("AESEncryptionService") EncryptionService aesEncryptionService,
-			SecureRandom random) {
-		super();
-		this.aesEncryptionService = aesEncryptionService;
-		this.random = random;
-	}
+  @Autowired
+  public FileEncryptionServiceImpl(
+      @Qualifier("AESEncryptionService") EncryptionService aesEncryptionService)
+      throws NoSuchAlgorithmException {
+    super();
+    this.aesEncryptionService = aesEncryptionService;
+    this.random = SecureRandom.getInstanceStrong();
+  }
 
-	@Override
-	public byte[] decrypt(byte[] encrypted, byte[] key) throws InvalidKeyException, InvalidAlgorithmParameterException,
-			NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-		return this.aesEncryptionService.decrypt(encrypted, key);
-	}
+  @Override
+  public byte[] decrypt(byte[] encrypted, byte[] key)
+      throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+          NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+    return this.aesEncryptionService.decrypt(encrypted, key);
+  }
 
-	@Override
-	public byte[] encrypt(byte[] raw, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-		return this.aesEncryptionService.encrypt(raw, key);
-	}
+  @Override
+  public byte[] encrypt(byte[] raw, byte[] key)
+      throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+          InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    return this.aesEncryptionService.encrypt(raw, key);
+  }
 
-	@Override
-	public String generateRandomKey() throws NoSuchAlgorithmException {
-		return this.aesEncryptionService.generateRandomKey();
-	}
+  @Override
+  public String generateRandomKey() throws NoSuchAlgorithmException {
+    return this.aesEncryptionService.generateRandomKey();
+  }
 
-	@Override
-	public byte[] decrypt(String fileName, byte[] key)
-			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
-			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+  @Override
+  public byte[] decrypt(String fileName, byte[] key)
+      throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+          NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 
-		Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-		final byte[] nonce = new byte[12];
+    Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+    final byte[] nonce = new byte[12];
 
-		try (FileInputStream fs = new FileInputStream(fileName)) {
-			fs.read(nonce);
-			GCMParameterSpec spec = new GCMParameterSpec(TAG_SIZE, nonce);
-			cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), spec);
+    try (FileInputStream fs = new FileInputStream(fileName)) {
+      fs.read(nonce);
+      GCMParameterSpec spec = new GCMParameterSpec(TAG_SIZE, nonce);
+      cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), spec);
 
-			try (CipherInputStream cipherIn = new CipherInputStream(fs, cipher)) {
+      try (CipherInputStream cipherIn = new CipherInputStream(fs, cipher)) {
 
-				return cipherIn.readAllBytes();
+        return cipherIn.readAllBytes();
+      }
+    }
+  }
 
-			}
-		}
+  // public static final byte[] nonce = new byte[12];
 
-	}
+  @Override
+  public void encryptAndStore(String fileName, byte[] content, byte[] key)
+      throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+          InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
+          FileNotFoundException, IOException {
+    Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 
-	// public static final byte[] nonce = new byte[12];
+    final byte[] nonce = new byte[12];
+    random.nextBytes(nonce);
+    GCMParameterSpec spec = new GCMParameterSpec(TAG_SIZE, nonce);
+    cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), spec);
 
-	@Override
-	public void encryptAndStore(String fileName, byte[] content, byte[] key) throws NoSuchAlgorithmException,
-			NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
-			BadPaddingException, FileNotFoundException, IOException {
-		Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-
-		final byte[] nonce = new byte[12];
-		random.nextBytes(nonce);
-		GCMParameterSpec spec = new GCMParameterSpec(TAG_SIZE, nonce);
-		cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), spec);
-
-		try (FileOutputStream fileOut = new FileOutputStream(new File(fileName));
-				CipherOutputStream cipherOut = new CipherOutputStream(fileOut, cipher)) {
-			System.out.println(Base64.getEncoder().encode(nonce).length);
-			fileOut.write(nonce);
-			cipherOut.write(content);
-		}
-
-	}
-
+    try (FileOutputStream fileOut = new FileOutputStream(new File(fileName));
+        CipherOutputStream cipherOut = new CipherOutputStream(fileOut, cipher)) {
+      System.out.println(Base64.getEncoder().encode(nonce).length);
+      fileOut.write(nonce);
+      cipherOut.write(content);
+    }
+  }
 }
