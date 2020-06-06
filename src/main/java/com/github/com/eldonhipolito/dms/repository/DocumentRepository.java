@@ -9,4 +9,5 @@ import com.github.com.eldonhipolito.dms.core.Document;
 public interface DocumentRepository extends JpaRepository<Document, Long> {
 
   List<Document> findDocumentByDocumentOwnerUsername(String username);
+  List<Document> findDocumentByDocumentSignaturesUserUsername(String username);
 }

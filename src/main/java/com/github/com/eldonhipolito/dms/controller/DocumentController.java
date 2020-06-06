@@ -3,6 +3,7 @@ package com.github.com.eldonhipolito.dms.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("documents")
@@ -51,12 +51,16 @@ public class DocumentController {
 
   private final DocumentAccessService documentAccessService;
 
-  @GetMapping("/{owner}")
-  public ResponseEntity<ListDocumentResponse> listDocumentsByOwner(@PathVariable String owner) {
-    log.trace("[DOCUMENT] - listDocumentsByOwner({})", owner);
+  @GetMapping("/{username}")
+  public ResponseEntity<ListDocumentResponse> listDocuments(
+      @PathVariable String username, @RequestParam String relation) {
+    log.info("[DOCUMENT] - listDocuments({}, {})", username, relation);
 
     try {
-      List<Document> documents = this.documentRepository.findDocumentByDocumentOwnerUsername(owner);
+      List<Document> documents =
+          "owner".equalsIgnoreCase(relation)
+              ? this.documentRepository.findDocumentByDocumentOwnerUsername(username)
+              : this.documentRepository.findDocumentByDocumentSignaturesUserUsername(username);
 
       List<DocumentResponse> docres = new ArrayList<DocumentResponse>();
 
@@ -66,7 +70,8 @@ public class DocumentController {
                 doc.getId().intValue(),
                 doc.getTitle(),
                 doc.getDocumentHash(),
-                doc.getNumberSignatoriesRequired()));
+                doc.getNumberSignatoriesRequired(),
+                doc.getDescription()));
       }
 
       return new ResponseEntity<ListDocumentResponse>(
@@ -76,6 +81,37 @@ public class DocumentController {
       log.error(e.getMessage(), e);
       return new ResponseEntity<ListDocumentResponse>(
           new ListDocumentResponse(false, "Error retrieving list", null),
+          HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @GetMapping("/{documentId}")
+  public ResponseEntity<DocumentResponse> getDocument(@PathVariable int documentId) {
+    log.info("[DOCUMENT] - getDocument({}, {})", documentId);
+
+    try {
+      Optional<Document> doc = this.documentRepository.findById((long) documentId);
+
+      if (doc.isEmpty()) {
+        return new ResponseEntity<DocumentResponse>(
+            new DocumentResponse(false, "Document not found"), HttpStatus.NOT_FOUND);
+      }
+
+      return new ResponseEntity<DocumentResponse>(
+          new DocumentResponse(
+              true,
+              "success",
+              doc.get().getId().intValue(),
+              doc.get().getTitle(),
+              doc.get().getDocumentHash(),
+              0,
+              doc.get().getDescription()),
+          HttpStatus.OK);
+
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return new ResponseEntity<DocumentResponse>(
+          new DocumentResponse(false, "Error retrieving document"),
           HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
