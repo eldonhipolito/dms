@@ -13,6 +13,6 @@ public class DocumentValidationRequest {
 
 	private final MultipartFile file;
 
-	private int documentId;
+	private final int documentId;
 
 }

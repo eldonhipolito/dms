@@ -24,6 +24,7 @@ import com.github.com.eldonhipolito.dms.request.CreateDocumentAccessRequest;
 import com.github.com.eldonhipolito.dms.request.CreateDocumentRequest;
 import com.github.com.eldonhipolito.dms.request.CreateDocumentRequestWrapper;
 import com.github.com.eldonhipolito.dms.request.CreateDocumentSignatureRequest;
+import com.github.com.eldonhipolito.dms.request.DocumentValidationRequest;
 import com.github.com.eldonhipolito.dms.response.CreateDocumentAccessResponse;
 import com.github.com.eldonhipolito.dms.response.DocumentCreationResponse;
 import com.github.com.eldonhipolito.dms.response.DocumentResponse;
@@ -164,7 +165,7 @@ public class DocumentController {
     return new ResponseEntity<GenericResponse>(response, HttpStatus.CREATED);
   }
 
-  @PostMapping("/documents/{documentId}/grantaccess")
+  @PostMapping("/{documentId}/grantaccess")
   public ResponseEntity<CreateDocumentAccessResponse> grantAccess(
       @RequestBody CreateDocumentAccessRequest request) {
     log.trace("[DOCUMENT] - grantAccess({})", request.getViewer());
@@ -181,5 +182,22 @@ public class DocumentController {
     }
 
     return new ResponseEntity<CreateDocumentAccessResponse>(response, HttpStatus.OK);
+  }
+
+  @PostMapping("/{documentId}/verify")
+  public ResponseEntity<GenericResponse> verify(
+      @PathVariable("documentId") int documentId, @ModelAttribute MultipartFile file) {
+    log.trace("[DOCUMENT] - verify({})", documentId);
+    try {
+      return new ResponseEntity<GenericResponse>(
+          new GenericResponse(
+              this.documentService.isDocumentValid(new DocumentValidationRequest(file, documentId)),
+              "Verification result"),
+          HttpStatus.OK);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      return new ResponseEntity<GenericResponse>(
+          new GenericResponse(false, "Error verifying document"), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
