@@ -61,8 +61,10 @@ public class DocumentAccessServiceImpl implements DocumentAccessService {
   public String grantAccess(CreateDocumentAccessRequest request) {
     log.info("[DOCUMENT] - grantAccess({})", request.getViewer());
 
+    
     String randomCode = String.format("%06d", randomizer.nextInt(1000000));
 
+    
     Optional<Document> doc = documentRepository.findById((long) request.getDocumentId());
 
     if (doc.isEmpty()) {

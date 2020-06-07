@@ -18,6 +18,7 @@ public class DocumentResponse extends GenericResponse {
   private String hash;
   private int numberSignatoriesRequired;
   private String description;
+  private String owner;
 
   public DocumentResponse(
       boolean success,
@@ -26,13 +27,15 @@ public class DocumentResponse extends GenericResponse {
       String title,
       String hash,
       int numberSignatoriesRequired,
-      String description) {
+      String description,
+      String owner) {
     super(success, result);
     this.id = id;
     this.title = title;
     this.hash = hash;
     this.numberSignatoriesRequired = numberSignatoriesRequired;
     this.description = description;
+    this.owner = owner;
   }
 
   public DocumentResponse(boolean success, String result) {

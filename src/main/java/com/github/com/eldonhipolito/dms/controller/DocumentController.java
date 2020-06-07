@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,7 +70,8 @@ public class DocumentController {
                 doc.getTitle(),
                 doc.getDocumentHash(),
                 doc.getNumberSignatoriesRequired(),
-                doc.getDescription()));
+                doc.getDescription(),
+                ""));
       }
 
       return new ResponseEntity<ListDocumentResponse>(
@@ -85,7 +85,7 @@ public class DocumentController {
     }
   }
 
-  @GetMapping("/{documentId}")
+  @GetMapping("/{documentId}/details")
   public ResponseEntity<DocumentResponse> getDocument(@PathVariable int documentId) {
     log.info("[DOCUMENT] - getDocument({}, {})", documentId);
 
@@ -105,7 +105,8 @@ public class DocumentController {
               doc.get().getTitle(),
               doc.get().getDocumentHash(),
               0,
-              doc.get().getDescription()),
+              doc.get().getDescription(),
+              doc.get().getDocumentOwner().getUsername()),
           HttpStatus.OK);
 
     } catch (Exception e) {
